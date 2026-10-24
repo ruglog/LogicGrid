@@ -1,0 +1,11 @@
+﻿<Solution>
+  <Project Path="SchemMobile.Android/SchemMobile.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="SchemMobile.Browser/SchemMobile.Browser.csproj" />
+  <Project Path="SchemMobile.Desktop/SchemMobile.Desktop.csproj" />
+  <Project Path="SchemMobile.iOS/SchemMobile.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="SchemMobile/SchemMobile.csproj" />
+</Solution>

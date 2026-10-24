@@ -1,0 +1,110 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Schem"
+        x:Class="Schem.MainWindow"
+        Title="Конструктор схем by RugLog" Width="1000" Height="650"
+        WindowStartupLocation="CenterScreen"
+        RequestedThemeVariant="Light">
+
+    <Window.Styles>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" Background="#2D2D2D">
+            <MenuItem Header="Файл" Foreground="White">
+                <MenuItem Header="Сохранить в JSON" Click="OnSaveClick" Foreground="Black" InputGesture="Ctrl+S" />
+                <MenuItem Header="Открыть JSON" Click="OnLoadClick" Foreground="Black" InputGesture="Ctrl+O" />
+                <Separator/>
+                <MenuItem Header="Очистить всё" Click="OnClearClick" Foreground="Black" />
+            </MenuItem>
+            <MenuItem Header="Справка" Foreground="White" Click="OnHelpClick" />
+        </Menu>
+
+        <Border DockPanel.Dock="Bottom" Background="#F0F0F0" Padding="8" BorderBrush="#CCC" BorderThickness="0,1,0,0">
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Добавить корневой блок" Click="OnAddRootClick" Margin="0,0,15,0" Background="#333" Foreground="White" FontWeight="Bold"/>
+                <Button Content="Центрировать" Click="OnCenterClick" Margin="0,0,15,0" Background="#444" Foreground="White"/>
+                <TextBlock Text="Режим:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox x:Name="ModePicker" SelectedIndex="0" Margin="0,0,15,0" Width="100" SelectionChanged="OnModeChanged">
+                    <ComboBoxItem>Схема</ComboBoxItem>
+                    <ComboBoxItem>Древо</ComboBoxItem>
+                </ComboBox>
+
+                <TextBlock Text="Цвет:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <ComboBox x:Name="ColorPicker" SelectedIndex="0" Margin="0,0,15,0" Width="100">
+                    <ComboBoxItem>Черный</ComboBoxItem>
+                    <ComboBoxItem>Белый</ComboBoxItem>
+                </ComboBox>
+
+                <TextBlock Text="Шир:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <NumericUpDown x:Name="WidthSpinner" Value="140" Minimum="50" Maximum="400" Increment="10" Margin="0,0,10,0" Width="130" ValueChanged="OnSizeChanged"/>
+
+                <TextBlock Text="Выс:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <NumericUpDown x:Name="HeightSpinner" Value="60" Minimum="30" Maximum="300" Increment="10" Margin="0,0,15,0" Width="130" ValueChanged="OnSizeChanged"/>
+            </WrapPanel>
+        </Border>
+
+        <Grid ClipToBounds="True">
+            <local:WaveBackground x:Name="InteractiveBg" />
+            
+            <Canvas x:Name="MainCanvas" Background="Transparent" ClipToBounds="False" 
+                    PointerPressed="OnCanvasPointerPressed" 
+                    PointerMoved="OnCanvasPointerMoved"
+                    PointerReleased="OnCanvasPointerReleased"
+                    PointerWheelChanged="OnCanvasPointerWheelChanged">
+                <Canvas x:Name="DiagramLayer" ClipToBounds="False" />
+            </Canvas>
+
+            <!-- МОДАЛЬНОЕ ОКНО СПРАВКИ -->
+            <Grid x:Name="HelpOverlay" Background="#B0000000" IsVisible="False" ZIndex="50">
+                <Border Background="#252526" CornerRadius="10" Padding="25" Width="550" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#555" BorderThickness="1">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="⌨️ Горячие клавиши и управление" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,0,0,10"/>
+                        <ScrollViewer MaxHeight="380">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="ОСНОВНЫЕ КОМАНДЫ:" FontWeight="Bold" Foreground="#888"/>
+                                <TextBlock Text="• Ctrl + Z — Отменить последнее действие (перемещение, размер, текст)" Foreground="White"/>
+                                <TextBlock Text="• Ctrl + S — Сохранить схему в JSON-файл" Foreground="White"/>
+                                <TextBlock Text="• Ctrl + O — Открыть схему из JSON-файла" Foreground="White"/>
+                                <TextBlock Text="• Ctrl + X / Ctrl + Shift + X — Быстрая смена режима (Схема / Древо)" Foreground="White"/>
+                                <TextBlock Text="• F1 — Открыть / закрыть эту справку" Foreground="White"/>
+                                <TextBlock Text="КОПИРОВАНИЕ И ВСТАВКА:" FontWeight="Bold" Foreground="#888" Margin="0,10,0,0"/>
+                                <TextBlock Text="• Ctrl + C / Ctrl + V — Копировать и вставить независимый блок" Foreground="White"/>
+                                <TextBlock Text="• Ctrl + Shift + C / Ctrl + Shift + V — Копировать и вставить дочерний блок с веточкой" Foreground="White"/>
+                                <TextBlock Text="УПРАВЛЕНИЕ МЫШЬЮ:" FontWeight="Bold" Foreground="#888" Margin="0,10,0,0"/>
+                                <TextBlock Text="• Зажать ЛКМ на блоке — Перемещение блока по холсту" Foreground="White"/>
+                                <TextBlock Text="• Зажать Ctrl + ЛКМ на блоке — Изменение размера (ресайз)" Foreground="White"/>
+                                <TextBlock Text="• Клик ПКМ по блоку — Контекстное меню (добавить child, копировать, удалить)" Foreground="White"/>
+                                <TextBlock Text="• Клик по пустому месту — Снять выделение с блока и сбросить курсор текста" Foreground="White"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Button Content="Закрыть" Click="OnCloseHelpClick" HorizontalAlignment="Right" Margin="0,15,0,0" Background="#007ACC" Foreground="White" FontWeight="Bold" Padding="15,8"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- МОДАЛЬНОЕ ОКНО ПРЕДУПРЕЖДЕНИЯ О РАЗРЕШЕНИИ -->
+            <Grid x:Name="WarningOverlay" Background="#D0000000" IsVisible="False" ZIndex="100">
+                <Border Background="#252526" CornerRadius="10" Padding="25" Width="450" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#885500" BorderThickness="2">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="⚠️ Внимание" FontSize="20" FontWeight="Bold" Foreground="#FFA500"/>
+                        <TextBlock x:Name="WarningText" Text="..." Foreground="White" TextWrapping="Wrap" FontSize="15" LineHeight="22"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+                            <Button Content="Отмена" Click="OnWarningNoClick" Background="#555" Foreground="White" Width="90" HorizontalContentAlignment="Center"/>
+                            <Button Content="Открыть" Click="OnWarningYesClick" Background="#D9534F" Foreground="White" Width="90" HorizontalContentAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+        </Grid>
+    </DockPanel>
+</Window>
